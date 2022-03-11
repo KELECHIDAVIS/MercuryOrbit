@@ -9,14 +9,17 @@ public class Panel extends GamePanel{
     Sun sun = new Sun();
     boolean all = false;
     ArrayList<Mercury> planets = new ArrayList<>();
-    Mercury singlePlanet = new Mercury();
+
     Info info = new Info();
+    boolean drawOrbit = false;
+    String text = "";
     int index =0;
     Panel()
     {
         //init info
         initInfo();
-        showOrbit(0);
+        //showOrbit(0);
+        this.setBackground(Color.black);
         this.start();
     }
 
@@ -55,13 +58,24 @@ public class Panel extends GamePanel{
     public void paint(Graphics g) {
         /*super.paintComponents(g);*/
 
-        super.paintComponents(g);
+        super.paintComponent(g);
+        //g.clearRect(0,0,600,600);
         sun.draw(g);
+        System.out.println(info.dates.size());
 
-            for(Mercury planet: planets)
-            {
-                planet.draw(g);
-            }
+        for(Mercury planet: planets)
+        {
+            planet.draw(g);
+        }
+
+        Graphics2D g1 = (Graphics2D) g;
+
+        g1.drawString(text, 250,20);
+        // draw ellipse
+        if(drawOrbit)
+            drawEllipse(g1);
+
+
 
 
     }
@@ -73,15 +87,35 @@ public class Panel extends GamePanel{
 
     void showOrbit(int it) // show one
     {
+        Mercury singlePlanet = new Mercury();
         planets.clear();
-        double length = 1000*info.lengths.get(it);
+        double length = 500*info.lengths.get(it);
         double angle = info.angles.get(it);
-        singlePlanet.x= (int) (sun.x+(length*Math.cos(Math.toRadians(angle))));
-        singlePlanet.y = (int) (sun.y+(length*Math.sin(Math.toRadians(angle))));
+        singlePlanet.x= (int) (sun.x+(length*Math.cos(Math.toRadians(-angle))));
+        singlePlanet.y = (int) (sun.y+(length*Math.sin(Math.toRadians(-angle))));
         singlePlanet.x-=singlePlanet.size/2;
+        singlePlanet.y-=singlePlanet.size/2;
+        text  = info.dates.get(it)+" | "+info.lengths.get(it)+" | "+info.angles.get(it);
         planets.add(singlePlanet);
 
+
     }
+    void drawEllipse(Graphics2D g )
+    {
+        int[] x = new int[46];
+        int[] y= new int[46];
+        for(int i = 0 ; i<x.length; i++)
+        {
+            double length = 500*info.lengths.get(i);
+            double angle = info.angles.get(i);
+            x[i] = (int) (sun.x+(length*Math.cos(Math.toRadians(-angle))));
+            y[i] =(int) (sun.y+(length*Math.sin(Math.toRadians(-angle))));
+
+        }
+        g.setColor(new Color(255,255,255,40));
+        g.drawPolygon(x,y,46);
+    }
+
 
     /*void showOrbit() // this is to show all of them
     {
@@ -106,16 +140,7 @@ public class Panel extends GamePanel{
         switch (e.getKeyCode())
         {
             case KeyEvent.VK_RIGHT:
-                all = false;
-                if(index<info.dates.size())
-                    index++;
-                else
-                    index = 0;
-                showOrbit(index);
 
-                break;
-
-            case KeyEvent.VK_LEFT:
                 all = false;
                 if(index>0)
                     index--;
@@ -123,8 +148,17 @@ public class Panel extends GamePanel{
                     index = info.dates.size()-1;
                 showOrbit(index);
                 break;
-            case KeyEvent.VK_SPACE:
+
+            case KeyEvent.VK_LEFT:
+                all = false;
+                if(index<info.dates.size()-1)
+                    index++;
+                else
+                    index = 0;
+                showOrbit(index);
                 break;
+            case KeyEvent.VK_SPACE:
+                drawOrbit =!drawOrbit;
         }
     }
 
